@@ -10,8 +10,12 @@ class DataManager {
     public:
         DataManager();
         void readToy(string dataset, string csv);
+        string getcsv(){
+            return csv_;
+        }
     private:
         Graph<int> graph;
+        string csv_;
 };
 
 #endif

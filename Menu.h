@@ -8,6 +8,7 @@ class Menu {
     public:
         Menu();
         void init();
+        void mainMenu();
     private:
         DataManager dataManager;
 };

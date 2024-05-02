@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "Graph.h"
 
 using namespace std;
@@ -49,6 +50,7 @@ void DataManager::readToy(string dataset, string csv) {
     string path = "../data/" + dataset + "/" + csv;
     ifstream file(path);
     string line;
+    csv_ = csv;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -56,24 +58,16 @@ void DataManager::readToy(string dataset, string csv) {
         getline(file, line);
         while (getline(file, line)) {
             string source, dest, weight;
-            int i = 0;
-            while (line[i] != ',') {
-                source += line[i];
-                i++;
-            }
-            i++;
-            while (line[i] != ',') {
-                dest += line[i];
-                i++;
-            }
-            i++;
-            while (i < line.size()) {
-                weight += line[i];
-                i++;
-            }
+            istringstream iss(line);
+            getline(iss, source, ',');
+            getline(iss, dest, ',');
+            getline(iss, weight, ',');
+            string temp;
+            getline(iss, temp, ',');
+            getline(iss, temp, ',');
             graph.addVertex(stoi(source));
             graph.addVertex(stoi(dest));
-            graph.addEdge(stoi(source), stoi(dest), stoi(weight));
+            graph.addEdge(stoi(source), stoi(dest), stod(weight));
             cout << source << " " << dest << " " << weight << endl;
         }
     }
