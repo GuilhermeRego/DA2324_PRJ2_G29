@@ -710,35 +710,35 @@ Graph<T> Graph<T>::primMST() const {
             std::vector<std::pair<double, Vertex<T>*>>,
             std::greater<std::pair<double, Vertex<T>*>>> pq;
 
-    std::map<Vertex<T>*, double> dist;
-    std::map<Vertex<T>*, Vertex<T>*> parent;
-    std::map<Vertex<T>*, bool> inMST;
+    std::unordered_map<Vertex<T>*, double> dist;
+    std::unordered_map<Vertex<T>*, Vertex<T>*> parent;
+    std::unordered_set<Vertex<T>*> inMST;
 
     for (auto v : vertexSet) {
         dist[v] = INF;
-        inMST[v] = false;
+        inMST.insert(v);
         parent[v] = nullptr;
         mst.addVertex(v->getInfo());
     }
 
     Vertex<T> *startVertex = vertexSet[0];
-    pq.push(std::make_pair(0, startVertex));
+    pq.push({0, startVertex});
     dist[startVertex] = 0;
 
     while (!pq.empty()) {
         Vertex<T> *v = pq.top().second;
         pq.pop();
 
-        if (inMST[v]) continue;
-        inMST[v] = true;
+        if (inMST.find(v) == inMST.end()) continue;
+        inMST.erase(v);
 
-        for (Edge<T> *e : v->getAdj()) {
+        for (auto e : v->getAdj()) {
             Vertex<T> *u = e->getDest();
             double weight = e->getWeight();
 
-            if (!inMST[u] && dist[u] > weight) {
+            if (inMST.find(u) != inMST.end() && dist[u] > weight) {
                 dist[u] = weight;
-                pq.push(std::make_pair(dist[u], u));
+                pq.push({dist[u], u});
                 parent[u] = v;
             }
         }
@@ -752,5 +752,6 @@ Graph<T> Graph<T>::primMST() const {
 
     return mst;
 }
+
 
 #endif /* DA_TP_CLASSES_GRAPH */

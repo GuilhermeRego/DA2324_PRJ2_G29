@@ -1,7 +1,3 @@
-//
-// Created by guire on 01/05/2024.
-//
-
 #include "Menu.h"
 
 Menu::Menu() {
@@ -52,7 +48,7 @@ void Menu::mainMenu() {
             case 1:
                 break;
             case 2:
-                dataManager.realWorldTAH();
+                dataManager.realWorldGraphTAH();
                 break;
             case 3:
                 cout << "\nGoodbye!\n";

@@ -10,6 +10,7 @@ using namespace std;
 
 
 class DataManager {
+
     public:
         DataManager();
         void readToy(const string& dataset, const string& csv);
@@ -19,20 +20,16 @@ class DataManager {
         string getDataset() { return dataset_; }
         unordered_map<int, Node> getNodes() { return nodes; }
         void toyGraphTAH();
+        void realWorldGraphTAH();
+        void completeGraph();
+        void printTourCost(const vector<int>& tour);
+        void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
-    void realWorldTAH();
-
-private:
-        Graph<int> graph;
-        string dataset_;
-        string csv_;
-        unordered_map<int, Node> nodes;
-
-    void dfsMST(int vertex, Graph<int> &mst, std::unordered_set<int> &visited, vector<int> &tour);
-
-    void completeGraph();
-
-    void printTourCost(const vector<int>& tour);
+    private:
+            Graph<int> graph;
+            string dataset_;
+            string csv_;
+            unordered_map<int, Node> nodes;
 };
 
 #endif

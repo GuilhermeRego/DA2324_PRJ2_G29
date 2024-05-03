@@ -91,6 +91,7 @@ void DataManager::readToy(const string& dataset, const string& csv) {
             graph.addVertex(stoi(source));
             graph.addVertex(stoi(dest));
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
+            graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
     cout << "Dataset read successfully" << endl;
@@ -129,6 +130,7 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, dest, ',');
             getline(iss, weight, ',');
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
+            graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
     completeGraph();
@@ -198,28 +200,11 @@ void DataManager::toyGraphTAH() {
     int startVertex = 0;
     dfsMST(startVertex, mst, visited, tour);
     tour.push_back(startVertex);
-    cout << "Tour: ";
-    for (int i = 0; i < tour.size(); i++) {
-        cout << tour[i];
-        if (i != tour.size() - 1)
-            cout << " -> ";
-    }
-    cout << endl;
     printTourCost(tour);
 }
 
-void DataManager::realWorldTAH() {
-    Graph<int> mst = graph.primMST();
-    vector<int> tour;
-    unordered_set<int> visited;
-    int startVertex = 0;
-    dfsMST(startVertex, mst, visited, tour);
-    tour.push_back(startVertex);
-    cout << "Tour: ";
-    for (int vertex : tour) {
-        cout << vertex << " ";
-    }
-    cout << endl;
+void DataManager::realWorldGraphTAH() {
+    // TODO
 }
 
 void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visited, vector<int>& tour) {
@@ -234,16 +219,35 @@ void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visite
 }
 
 void DataManager::printTourCost(const vector<int>& tour) {
+    cout << "Tour: ";
+    for (int i = 0; i < tour.size(); i++) {
+        cout << tour[i];
+        if (i != tour.size() - 1)
+            cout << " -> ";
+    }
+    cout << endl;
+
     double cost = 0;
     for (int i = 0; i < tour.size() - 2; i++) {
         auto vertex1 = graph.findVertex(tour[i]);
         auto vertex2 = graph.findVertex(tour[i + 1]);
         for (auto edge : vertex1->getAdj()) {
             if (edge->getDest()->getInfo() == vertex2->getInfo()) {
+                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
                 cost += edge->getWeight();
                 break;
             }
         }
     }
-    cout << "Tour cost: " << cost << endl;
+    auto first = graph.findVertex(tour[0]);
+    auto last = graph.findVertex(tour[tour.size() - 2]);
+    for (auto edge : last->getAdj()) {
+        if (edge->getDest()->getInfo() == first->getInfo()) {
+            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight()
+                 << endl;
+            cost += edge->getWeight();
+            break;
+        }
+    }
+    cout << "Tour minimum cost: " << cost << endl;
 }
