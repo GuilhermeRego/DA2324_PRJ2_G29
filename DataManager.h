@@ -31,6 +31,8 @@ private:
     void dfsMST(int vertex, Graph<int> &mst, std::unordered_set<int> &visited, vector<int> &tour);
 
     void completeGraph();
+
+    void printTourCost(const vector<int>& tour);
 };
 
 #endif

@@ -714,33 +714,28 @@ Graph<T> Graph<T>::primMST() const {
     std::map<Vertex<T>*, Vertex<T>*> parent;
     std::map<Vertex<T>*, bool> inMST;
 
-    // Inicializa todas as distâncias como infinito e inMST como falso
     for (auto v : vertexSet) {
         dist[v] = INF;
         inMST[v] = false;
         parent[v] = nullptr;
-        mst.addVertex(v->getInfo()); // Adiciona o vértice ao grafo da MST
+        mst.addVertex(v->getInfo());
     }
 
-    // Escolha o vértice inicial
     Vertex<T> *startVertex = vertexSet[0];
     pq.push(std::make_pair(0, startVertex));
     dist[startVertex] = 0;
 
     while (!pq.empty()) {
-        // Obtenha o vértice com a menor distância, que ainda não está incluído na MST
         Vertex<T> *v = pq.top().second;
         pq.pop();
 
-        if (inMST[v]) continue; // Se já foi adicionado à MST, pule
-        inMST[v] = true;  // Inclua o vértice na MST
+        if (inMST[v]) continue;
+        inMST[v] = true;
 
-        // Processar todos os vértices adjacentes a este vértice
         for (Edge<T> *e : v->getAdj()) {
             Vertex<T> *u = e->getDest();
             double weight = e->getWeight();
 
-            // Se u não está na MST e o peso de v-u é menor que a distância atual de u
             if (!inMST[u] && dist[u] > weight) {
                 dist[u] = weight;
                 pq.push(std::make_pair(dist[u], u));
@@ -749,7 +744,6 @@ Graph<T> Graph<T>::primMST() const {
         }
     }
 
-    // Construir a MST efetivamente
     for (auto v : vertexSet) {
         if (parent[v] != nullptr) {
             mst.addEdge(parent[v]->getInfo(), v->getInfo(), dist[v]);

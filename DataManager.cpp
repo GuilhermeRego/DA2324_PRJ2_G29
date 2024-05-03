@@ -89,11 +89,11 @@ void DataManager::readToy(const string& dataset, const string& csv) {
             getline(iss, temp, ',');
             getline(iss, temp, ',');
             graph.addVertex(stoi(source));
-
             graph.addVertex(stoi(dest));
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
         }
     }
+    cout << "Dataset read successfully" << endl;
 }
 
 void DataManager::readRealWorld(const string& dataset, const string& selectedGraph) {
@@ -132,6 +132,7 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
         }
     }
     completeGraph();
+    cout << "Dataset read successfully" << endl;
 }
 
 double haversineDistance(double lat1, double lon1, double lat2, double lon2);
@@ -198,10 +199,13 @@ void DataManager::toyGraphTAH() {
     dfsMST(startVertex, mst, visited, tour);
     tour.push_back(startVertex);
     cout << "Tour: ";
-    for (int vertex : tour) {
-        cout << vertex << " ";
+    for (int i = 0; i < tour.size(); i++) {
+        cout << tour[i];
+        if (i != tour.size() - 1)
+            cout << " -> ";
     }
     cout << endl;
+    printTourCost(tour);
 }
 
 void DataManager::realWorldTAH() {
@@ -227,4 +231,19 @@ void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visite
             dfsMST(neighbor, mst, visited, tour);
         }
     }
+}
+
+void DataManager::printTourCost(const vector<int>& tour) {
+    double cost = 0;
+    for (int i = 0; i < tour.size() - 2; i++) {
+        auto vertex1 = graph.findVertex(tour[i]);
+        auto vertex2 = graph.findVertex(tour[i + 1]);
+        for (auto edge : vertex1->getAdj()) {
+            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
+                cost += edge->getWeight();
+                break;
+            }
+        }
+    }
+    cout << "Tour cost: " << cost << endl;
 }

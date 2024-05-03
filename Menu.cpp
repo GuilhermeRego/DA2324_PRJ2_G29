@@ -44,7 +44,7 @@ void Menu::mainMenu() {
         int choice;
         cout << "\n===== Main Menu =====" << endl;
         cout << "1 - Backtracking Algorithm" << endl;
-        cout << "2 - TSP in the Real World" << endl;
+        cout << "2 - Triangular Approximation Heuristic" << endl;
         cout << "3 - Exit" << endl;
         cin >> choice;
 
