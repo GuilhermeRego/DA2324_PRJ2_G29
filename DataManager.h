@@ -19,6 +19,7 @@ class DataManager {
         string getCsv() { return csv_; }
         string getDataset() { return dataset_; }
         unordered_map<int, Node> getNodes() { return nodes; }
+        Graph<int> getGraph() {return graph;}
         void toyGraphTAH();
         void realWorldGraphTAH();
         void completeGraph();
