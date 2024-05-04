@@ -27,6 +27,7 @@ void Menu::mainMenu() {
                 dataManager.toyGraphTAH();
                 break;
             case 3:
+                runNearestNeighborHeuristic();
                 break;
             case 4:
                 cout << "\nGoodbye!\n";
@@ -42,7 +43,8 @@ void Menu::mainMenu() {
         cout << "\n===== Main Menu =====" << endl;
         cout << "1 - Backtracking Algorithm" << endl;
         cout << "2 - Triangular Approximation Heuristic" << endl;
-        cout << "3 - Exit" << endl;
+        cout << "3 - Other Heuristics" << endl;
+        cout << "4- Exit" << endl;
         cin >> choice;
 
         switch (choice) {
@@ -53,6 +55,9 @@ void Menu::mainMenu() {
                 dataManager.realWorldGraphTAH();
                 break;
             case 3:
+                runNearestNeighborHeuristic();
+                break;
+            case 4:
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:
@@ -81,29 +86,29 @@ double getEdgeWeight(const Graph<int>& graph, int source, int dest) {
             return edge->getWeight();
         }
     }
-    return INT_MAX; // Return a large value if edge not found (assuming no negative weights)
+    return INT_MAX;
 }
 
 
 void backtrack(const Graph<int>& graph, vector<int>& tour, vector<bool>& visited, double currentCost, double& minCost, vector<int>& bestTour) {
-    // Base case: If all nodes have been visited, update minCost if currentCost is less
+
     if (tour.size() == graph.getVertexSet().size()) {
         minCost = min(minCost, currentCost);
         if (minCost == currentCost) {
-            bestTour = tour; // Update the best tour
+            bestTour = tour;
         }
         return;
     }
 
-    // Try visiting each unvisited node and recursively find the minimum cost tour
+
     for (int i = 0; i < graph.getVertexSet().size(); ++i) {
         if (!visited[i]) {
             int lastNode = tour.back();
             if (hasEdge(graph.findVertex(lastNode), graph.findVertex(i))) {
                 tour.push_back(i);
                 visited[i] = true;
-                backtrack(graph, tour, visited, currentCost + getEdgeWeight(graph, lastNode, i), minCost, bestTour); // Assuming weight = 1 for each edge
-                // Backtrack
+                backtrack(graph, tour, visited, currentCost + getEdgeWeight(graph, lastNode, i), minCost, bestTour);
+
                 tour.pop_back();
                 visited[i] = false;
             }
@@ -111,16 +116,16 @@ void backtrack(const Graph<int>& graph, vector<int>& tour, vector<bool>& visited
     }
 }
 
-// Function to calculate the TSP using backtracking algorithm
-double Menu::calculateTSPBacktracking(const Graph<int>& graph, vector<int>& bestTour) {
-    // Initialize variables
-    double minCost = INT_MAX;
-    int startNode = 0; // Assuming starting and ending node is 0
-    vector<int> tour = {startNode}; // Initialize tour with starting node
-    vector<bool> visited(graph.getVertexSet().size(), false); // Mark all nodes as unvisited
-    visited[startNode] = true; // Mark the starting node as visited
 
-    // Call the backtracking function
+double Menu::calculateTSPBacktracking(const Graph<int>& graph, vector<int>& bestTour) {
+
+    double minCost = INT_MAX;
+    int startNode = 0;
+    vector<int> tour = {startNode};
+    vector<bool> visited(graph.getVertexSet().size(), false);
+    visited[startNode] = true;
+
+
     backtrack(graph, tour, visited, 0.0, minCost, bestTour);
 
     return minCost;
@@ -130,13 +135,13 @@ void Menu::runBacktrackingAlgorithm() {
     Graph<int> graph = dataManager.getGraph();
 
     if (graph.getVertexSet().size() != 0) {
-        vector<int> bestTour; // To store the best tour
+        vector<int> bestTour;
         double minCost = calculateTSPBacktracking(graph, bestTour);
 
-        // Calculate the weight of the last edge (from the last vertex to 0)
+
         double lastEdgeWeight = getEdgeWeight(graph, bestTour.back(), 0);
 
-        // Add the weight of the last edge to the tour cost
+
         minCost += lastEdgeWeight;
 
         cout << "Minimum cost tour using backtracking algorithm: " << minCost << endl;
@@ -144,10 +149,97 @@ void Menu::runBacktrackingAlgorithm() {
         for (size_t i = 0; i < bestTour.size() - 1; ++i) {
             cout << bestTour[i] << " -> ";
         }
-        cout << bestTour.back() << " -> 0"; // Print the last vertex and back to 0
+        cout << bestTour.back() << " -> 0";
         cout << endl;
     } else {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
     }
 }
+
+
+
+int findNearestNeighbor(const Graph<int>& graph, vector<bool>& visited, int currentVertex) {
+    int nearestNeighbor = -1;
+    double minDistance = numeric_limits<double>::max();
+    const vector<Vertex<int>*>& vertices = graph.getVertexSet();
+
+
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        if (!visited[i]) {
+            double distance = getEdgeWeight(graph, currentVertex, i);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestNeighbor = i;
+            }
+        }
+    }
+
+    return nearestNeighbor;
+}
+
+
+vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph) {
+    const vector<Vertex<int>*>& vertices = graph.getVertexSet();
+    int numVertices = vertices.size();
+
+
+    vector<bool> visited(numVertices, false);
+    vector<int> tour;
+    int currentVertex = 0;
+
+
+    tour.push_back(currentVertex);
+    visited[currentVertex] = true;
+
+    while (tour.size() < numVertices) {
+
+        int nearestNeighbor = findNearestNeighbor(graph, visited, currentVertex);
+
+
+        if (nearestNeighbor == -1) {
+
+            tour.pop_back();
+            currentVertex = tour.back();
+        } else {
+
+            tour.push_back(nearestNeighbor);
+            visited[nearestNeighbor] = true;
+            currentVertex = nearestNeighbor;
+        }
+    }
+
+    tour.push_back(0);
+
+    return tour;
+}
+
+
+double calculateTourCost(const Graph<int>& graph, const vector<int>& tour) {
+    double cost = 0;
+    for (size_t i = 0; i < tour.size() - 1; ++i) {
+        int source = tour[i];
+        int dest = tour[i + 1];
+        cost += getEdgeWeight(graph,source, dest);
+    }
+
+    return cost;
+}
+
+void Menu::runNearestNeighborHeuristic() {
+    Graph<int> graph = dataManager.getGraph();
+
+    if (graph.getVertexSet().size() != 0) {
+        vector<int> tour = calculateTSPNearestNeighbor(graph);
+        double tourCost = calculateTourCost(graph, tour);
+        cout << "TSP Tour using Nearest Neighbor Heuristic:" << endl;
+        for (int vertex : tour) {
+            cout << vertex << " ";
+        }
+        cout << endl;
+        cout << "Tour Cost: " << tourCost << endl;
+    } else {
+        cout << "Graph data is empty. Please parse the CSV file first.\n";
+    }
+}
+
 
