@@ -12,6 +12,7 @@ void Menu::init() {
 void Menu::mainMenu() {
     if (dataManager.getDataset() == "Toy-Graphs") {
         int choice;
+        cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv() << endl;
         cout << "\n===== Main Menu =====" << endl;
         cout << "1 - Backtracking Algorithm" << endl;
         cout << "2 - Triangular Approximation Heuristic" << endl;
@@ -24,9 +25,32 @@ void Menu::mainMenu() {
                 dataManager.runBacktrackingAlgorithm();
                 break;
             case 2:
+                if (dataManager.getCsv() == "shipping.csv") {
+                    cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
+                         << ") is not fully connected and therefore the Triangular Approximation Heuristic may not work as expected\n";
+                    char c;
+                    while (tolower(c) != 'y' && tolower(c) != 'n') {
+                        cout << "Would you like to continue? (y/n)\n";
+                        cin >> c;
+                        c = tolower(c);
+                        if (c == 'n') {
+                            mainMenu();
+                        }
+                    }
+                }
                 dataManager.toyGraphTAH();
                 break;
             case 3:
+                if (dataManager.getCsv() == "shipping.csv") {
+                    cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
+                         << ") is not fully connected and therefore the Nearest Neighbor Heuristic may not work as expected\n";
+                    cout << "Would you like to continue? (y/n)\n";
+                    char c;
+                    cin >> c;
+                    if (c == 'n') {
+                        mainMenu();
+                    }
+                }
                 dataManager.runNearestNeighborHeuristic();
                 break;
             case 4:
