@@ -129,12 +129,19 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, source, ',');
             getline(iss, dest, ',');
             getline(iss, weight, ',');
+            graph.addVertex(stoi(source));
+            graph.addVertex(stoi(dest));
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
             graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
     completeGraph();
-    cout << "Dataset read successfully" << endl;
+    if (graph.getVertexSet().empty()) {
+        cout << "Error reading dataset" << endl;
+    }
+    else {
+        cout << "Dataset read successfully" << endl;
+    }
 }
 
 double haversineDistance(double lat1, double lon1, double lat2, double lon2);
@@ -190,6 +197,138 @@ double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
     return EARTH_RADIUS * c; // Distance in meters
 }
 
+bool hasEdge(const Vertex<int>* source, const Vertex<int>* dest) {
+    for (const Edge<int>* edge : source->getAdj()) {
+        if (edge->getDest() == dest) {
+            return true;
+        }
+    }
+    return false;
+}
+
+double getEdgeWeight(const Graph<int>& graph, int source, int dest) {
+    for (const Edge<int>* edge : graph.findVertex(source)->getAdj()) {
+        if (edge->getDest()->getInfo() == dest) {
+            return edge->getWeight();
+        }
+    }
+    return INT_MAX;
+}
+
+// Backtracking Algorithm
+
+void backtrack(const Graph<int>& graph, vector<int>& tour, vector<bool>& visited, double currentCost, double& minCost, vector<int>& bestTour) {
+
+    if (tour.size() == graph.getVertexSet().size()) {
+        minCost = min(minCost, currentCost);
+        if (minCost == currentCost) {
+            bestTour = tour;
+        }
+        return;
+    }
+
+
+    for (int i = 0; i < graph.getVertexSet().size(); ++i) {
+        if (!visited[i]) {
+            int lastNode = tour.back();
+            if (hasEdge(graph.findVertex(lastNode), graph.findVertex(i))) {
+                tour.push_back(i);
+                visited[i] = true;
+                backtrack(graph, tour, visited, currentCost + getEdgeWeight(graph, lastNode, i), minCost, bestTour);
+
+                tour.pop_back();
+                visited[i] = false;
+            }
+        }
+    }
+}
+
+void DataManager::calculateTSPBacktracking(const Graph<int>& graph, vector<int>& bestTour) {
+    double minCost = INT_MAX;
+    int startNode = 0;
+    vector<int> tour = {startNode};
+    vector<bool> visited(graph.getVertexSet().size(), false);
+    visited[startNode] = true;
+    backtrack(graph, tour, visited, 0.0, minCost, bestTour);
+}
+
+void DataManager::runBacktrackingAlgorithm() {
+    if (!graph.getVertexSet().empty()) {
+        vector<int> bestTour;
+        calculateTSPBacktracking(graph, bestTour);
+        printTourCost(bestTour);
+        cout << endl;
+    }
+    else {
+        cout << "Graph data is empty. Please parse the CSV file first.\n";
+    }
+}
+
+// Other Heuristics
+
+int findNearestNeighbor(const Graph<int>& graph, vector<bool>& visited, int currentVertex) {
+    int nearestNeighbor = -1;
+    double minDistance = numeric_limits<double>::max();
+    const vector<Vertex<int>*>& vertices = graph.getVertexSet();
+
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        if (!visited[i]) {
+            double distance = getEdgeWeight(graph, currentVertex, (int) i);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestNeighbor = (int) i;
+            }
+        }
+    }
+
+    return nearestNeighbor;
+}
+
+vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph) {
+    const vector<Vertex<int>*>& vertices = graph.getVertexSet();
+    int numVertices = (int) vertices.size();
+
+    vector<bool> visited(numVertices, false);
+    vector<int> tour;
+    int currentVertex = 0;
+
+    tour.push_back(currentVertex);
+    visited[currentVertex] = true;
+
+    while (tour.size() < numVertices) {
+
+        int nearestNeighbor = findNearestNeighbor(graph, visited, currentVertex);
+
+        if (nearestNeighbor == -1) {
+
+            tour.pop_back();
+            currentVertex = tour.back();
+        } else {
+
+            tour.push_back(nearestNeighbor);
+            visited[nearestNeighbor] = true;
+            currentVertex = nearestNeighbor;
+        }
+    }
+
+    return tour;
+}
+
+void DataManager::runNearestNeighborHeuristic() {
+
+    if (!graph.getVertexSet().empty()) {
+        vector<int> tour = calculateTSPNearestNeighbor(graph);
+        printTourCost(tour);
+    }
+    else {
+        cout << "Graph data is empty. Please parse the CSV file first.\n";
+    }
+}
+
+
+
+
+
 // Triangular Approximation Heuristic
 
 void DataManager::toyGraphTAH() {
@@ -199,7 +338,6 @@ void DataManager::toyGraphTAH() {
     unordered_set<int> visited;
     int startVertex = 0;
     dfsMST(startVertex, mst, visited, tour);
-    tour.push_back(startVertex);
     printTourCost(tour);
 }
 
@@ -218,7 +356,8 @@ void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visite
     }
 }
 
-void DataManager::printTourCost(const vector<int>& tour) {
+void DataManager::printTourCost(vector<int>& tour) {
+    tour.push_back(0);
     cout << "Tour: ";
     for (int i = 0; i < tour.size(); i++) {
         cout << tour[i];
@@ -243,8 +382,7 @@ void DataManager::printTourCost(const vector<int>& tour) {
     auto last = graph.findVertex(tour[tour.size() - 2]);
     for (auto edge : last->getAdj()) {
         if (edge->getDest()->getInfo() == first->getInfo()) {
-            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight()
-                 << endl;
+            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
             cost += edge->getWeight();
             break;
         }

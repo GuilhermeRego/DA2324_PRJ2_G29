@@ -20,10 +20,15 @@ class DataManager {
         string getDataset() { return dataset_; }
         unordered_map<int, Node> getNodes() { return nodes; }
         Graph<int> getGraph() {return graph;}
+
+        static void calculateTSPBacktracking(const Graph<int>& graph, vector<int> &bestTour);
+        void runBacktrackingAlgorithm();
+        void runNearestNeighborHeuristic();
+
         void toyGraphTAH();
         void realWorldGraphTAH();
         void completeGraph();
-        void printTourCost(const vector<int>& tour);
+        void printTourCost(vector<int>& tour);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
     private:
