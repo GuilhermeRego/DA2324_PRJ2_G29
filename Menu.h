@@ -11,12 +11,6 @@ class Menu {
         void mainMenu();
     private:
         DataManager dataManager;
-
-    double calculateTSPBacktracking(const Graph<int>& graph, vector<int>& bestTour);
-
-    void runBacktrackingAlgorithm();
-
-    void runNearestNeighborHeuristic();
 };
 
 
