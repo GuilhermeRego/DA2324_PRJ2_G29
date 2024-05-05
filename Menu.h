@@ -5,12 +5,12 @@
 #include "DataManager.h"
 
 class Menu {
-    public:
-        Menu();
-        void init();
-        void mainMenu();
-    private:
-        DataManager dataManager;
+public:
+    Menu();
+    void init();
+    void mainMenu();
+private:
+    DataManager dataManager;
 };
 
 

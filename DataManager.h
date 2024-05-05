@@ -22,20 +22,23 @@ class DataManager {
         Graph<int> getGraph() {return graph;}
 
         static void calculateTSPBacktracking(const Graph<int>& graph, vector<int> &bestTour);
-        void runBacktrackingAlgorithm();
-        void runNearestNeighborHeuristic();
+        void runBacktrackingAlgorithm(Graph<int> graph);
+        void runNearestNeighborHeuristic(Graph<int> graph);
 
-        void toyGraphTAH();
-        void realWorldGraphTAH();
-        void completeGraph();
+        void TAH(Graph<int> graph);
+        void completeGraph(Graph<int> graph);
         void printTourCost(vector<int>& tour);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
-    private:
-            Graph<int> graph;
-            string dataset_;
-            string csv_;
-            unordered_map<int, Node> nodes;
+        void runNearestInsertionHeuristic(Graph<int> graph, int startVertex);
+        void runEfficientTSP(Graph<int> graph, int startVertex);
+
+private:
+        Graph<int> graph;
+        string dataset_;
+        string csv_;
+        unordered_map<int, Node> nodes;
+
 };
 
 #endif
