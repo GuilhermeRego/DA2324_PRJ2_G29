@@ -461,13 +461,132 @@ void applyTwoOpt(vector<int>& tour, const Graph<int>& graph) {
     }
 }
 
-void DataManager::runTSPSolver(Graph<int> graph, int startVertex) {
+double calculateTourCost(const Graph<int>& graph, const vector<int>& tour) {
+    double cost = 0.0;
+    for (size_t i = 0; i < tour.size() - 1; ++i) {
+        int vertex1 = tour[i];
+        int vertex2 = tour[i + 1];
+        if (hasEdge(graph.findVertex(vertex1), graph.findVertex(vertex2))) {
+            cost += getEdgeWeight(graph,vertex1, vertex2);
+        } else {
+            // Handle case where there is no edge between vertex1 and vertex2
+            // For TSP, this should not occur if the tour is valid
+            cout << "Warning: No edge between vertex " << vertex1 << " and vertex " << vertex2 << endl;
+        }
+    }
+    // Add cost of returning to the start vertex
+    cost += getEdgeWeight(graph,tour.back(), tour.front());
+    return cost;
+}
+
+void DataManager::printTourCost2(vector<int>& tour, int startVertex) {
+    tour.push_back(startVertex);
+    cout << "Tour: ";
+    for (int i = 0; i < tour.size(); i++) {
+        cout << tour[i];
+        if (i != tour.size() - 1)
+            cout << " -> ";
+    }
+    cout << endl;
+
+    double cost = 0;
+    for (int i = 0; i < tour.size() - 2; i++) {
+        auto vertex1 = graph.findVertex(tour[i]);
+        auto vertex2 = graph.findVertex(tour[i + 1]);
+        for (auto edge : vertex1->getAdj()) {
+            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
+                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
+                cost += edge->getWeight();
+                break;
+            }
+        }
+    }
+    auto first = graph.findVertex(tour[0]);
+    auto last = graph.findVertex(tour[tour.size() - 2]);
+    for (auto edge : last->getAdj()) {
+        if (edge->getDest()->getInfo() == first->getInfo()) {
+            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
+            cost += edge->getWeight();
+            break;
+        }
+    }
+    cout << "Tour minimum cost: " << cost << endl;
+}
+
+void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
     if (graph.getVertexSet().empty()) {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
         return;
     }
 
-    vector<int> tour = calculateTSPNearestNeighbor(graph, startVertex);
-    applyTwoOpt(tour, graph);
+    vector<int> bestTour;
+    double bestTourCost = numeric_limits<double>::max();
+
+    for (auto endVertex : graph.getVertexSet()) {
+        if (endVertex->getInfo() == startVertex) continue;
+
+        vector<int> tour = calculateTSPNearestNeighbor(graph, startVertex);
+        applyTwoOpt(tour, graph);
+
+        // Check if there is an edge from the last vertex back to the startVertex
+        if (hasEdge(graph.findVertex(startVertex), graph.findVertex(tour.back()))) {
+            double tourCost = calculateTourCost(graph, tour);
+            if (tourCost < bestTourCost) {
+                bestTour = tour;
+                bestTourCost = tourCost;
+            }
+        }
+    }
+
+    if (bestTour.empty() || bestTour.size() < graph.getNumVertex()) {
+        cout << "No path exists that returns to the origin and visits all nodes.\n";
+    } else {
+        printTourCost2(bestTour,startVertex);
+    }
+}
+
+
+
+
+ void DataManager::runNearestInsertionHeuristic(Graph<int> graph, int startVertex) {
+    if (graph.getVertexSet().empty()) {
+        cout << "Graph data is empty. Please parse the CSV file first.\n";
+        return;
+    }
+
+    vector<bool> visited(graph.getNumVertex(), false);
+    vector<int> tour;
+    tour.push_back(startVertex);
+    visited[startVertex] = true;
+
+    // Enquanto não visitar todos os vértices
+    while (tour.size() < graph.getNumVertex()) {
+        double minDistance = numeric_limits<double>::max();
+        auto current = tour.end();
+        int toInsert = -1;
+
+        // Encontra o vértice não visitado mais próximo de qualquer vértice no tour
+        for (int v = 0; v < graph.getNumVertex(); ++v) {
+            if (!visited[v]) {
+                for (auto it = tour.begin(); it != tour.end(); ++it) {
+                    double weight = getEdgeWeight(graph, *it, v);
+                    if (weight < minDistance) {
+                        minDistance = weight;
+                        current = it;
+                        toInsert = v;
+                    }
+                }
+            }
+        }
+
+        if (toInsert == -1) {
+            cout << "No path exists that returns to the origin and visits all nodes.\n";
+            return;
+        }
+
+        // Inserir o vértice mais próximo no tour
+        tour.insert(next(current), toInsert);
+        visited[toInsert] = true;
+    }
     printTourCost(tour);
 }

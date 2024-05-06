@@ -32,6 +32,8 @@ class DataManager {
 
         void runTSPSolver(Graph<int> graph, int startVertex);
 
+    void printTourCost2(vector<int> &tour, int startVertex);
+
 private:
         Graph<int> graph;
         string dataset_;
