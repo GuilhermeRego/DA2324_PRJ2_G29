@@ -13,6 +13,10 @@ using namespace std;
 // Parse of data from csv files
 
 DataManager::DataManager() {
+    start();
+}
+
+void DataManager::start() {
     string dataset, csv, selectedGraph, edges;
     cout << "Choose the dataset: " << endl;
     cout << "1 - Toy-Graphs" << endl;
@@ -92,8 +96,8 @@ void DataManager::readToy(const string& dataset, const string& csv) {
     string path = "../data/" + dataset + "/" + csv;
     ifstream file(path);
     string line;
-    dataset_ = dataset;
-    csv_ = csv;
+    directory = dataset;
+    subDirectory = csv;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -119,8 +123,8 @@ void DataManager::readToy(const string& dataset, const string& csv) {
 }
 
 void DataManager::readExtra(const string& edges) {
-    dataset_ = "Extra_Fully_Connected_Graphs";
-    csv_ = "edges_" + edges + ".csv";
+    directory = "Extra_Fully_Connected_Graphs";
+    subDirectory = "edges_" + edges + ".csv";
     string nodesPath = "../data/Extra_Fully_Connected_Graphs/nodes.csv";
     ifstream file(nodesPath);
     string line;
@@ -165,8 +169,8 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
     string path = "../data/" + dataset + "/" + selectedGraph + "/nodes.csv";
     ifstream file(path);
     string line;
-    dataset_ = dataset;
-    csv_ = selectedGraph;
+    directory = dataset;
+    subDirectory = selectedGraph;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -232,6 +236,28 @@ void DataManager::completeGraph(Graph<int> graph) {
     }
     cout << "Graph completed successfully" << endl;
 }
+
+void DataManager::clean() {
+    for (auto vertex : graph.getVertexSet()) {
+        graph.removeVertex(vertex->getInfo());
+    }
+    if (!graph.getVertexSet().empty() || graph.getNumVertex() != 0) {
+        cout << "Error cleaning graph" << endl;
+        exit(1);
+    }
+    nodes.clear();
+    directory = "";
+    subDirectory = "";
+}
+
+
+
+
+
+
+
+
+
 
 // Useful functions for algorithms
 

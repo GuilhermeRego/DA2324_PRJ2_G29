@@ -17,8 +17,8 @@ class DataManager {
         void readExtra(const string &edges);
         void readRealWorld(const string& basicString, const string& basicString1);
 
-        string getCsv() { return csv_; }
-        string getDataset() { return dataset_; }
+        string getCsv() { return subDirectory; }
+        string getDataset() { return directory; }
         unordered_map<int, Node> getNodes() { return nodes; }
         Graph<int> getGraph() {return graph;}
 
@@ -33,11 +33,15 @@ class DataManager {
         void runEfficientTSP(Graph<int> graph, int startVertex);
         void printTourCost(vector<int> &tour);
 
+        void start();
+        void clean();
+
     private:
             Graph<int> graph;
-            string dataset_;
-            string csv_;
+            string directory;
+            string subDirectory;
             unordered_map<int, Node> nodes;
+
 };
 
 #endif

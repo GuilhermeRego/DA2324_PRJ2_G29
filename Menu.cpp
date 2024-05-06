@@ -23,7 +23,8 @@ void Menu::mainMenu() {
     cout << "2 - Triangular Approximation Heuristic (fully connected)" << endl;
     cout << "3 - Other Heuristics (fully connected)" << endl;
     cout << "4 - TSP Solver" << endl;
-    cout << "5 - Exit" << endl;
+    cout << "5 - Change dataset" << endl;
+    cout << "6 - Exit" << endl;
     cin >> choice;
     if (dataManager.getDataset() == "Toy-Graphs" || dataManager.getDataset() == "Extra_Fully_Connected_Graphs") {
         switch (choice) {
@@ -94,6 +95,10 @@ void Menu::mainMenu() {
                 break;
             }
             case 5:
+                dataManager.clean();
+                dataManager.start();
+                break;
+            case 6:
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:
@@ -150,6 +155,9 @@ void Menu::mainMenu() {
                 break;
             }
             case 5:
+                // TODO
+                break;
+            case 6:
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:
