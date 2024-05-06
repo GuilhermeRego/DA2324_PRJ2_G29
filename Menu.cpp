@@ -1,4 +1,8 @@
 #include "Menu.h"
+#include <chrono>
+
+void printTime(std::chrono::milliseconds time);
+bool isFullyConnected(const Graph<int>& graph);
 
 Menu::Menu() {
     init();
@@ -8,30 +12,30 @@ void Menu::init() {
     mainMenu();
 }
 
-
 void Menu::mainMenu() {
+    int choice;
+    cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv();
+    if (isFullyConnected(dataManager.getGraph())) cout << " (fully connected)" << endl;
+    else cout << " (not fully connected)" << endl;
+    cout << "\n===== Main Menu =====" << endl;
+    cout << "1 - Backtracking Algorithm" << endl;
+    cout << "2 - Triangular Approximation Heuristic (fully connected)" << endl;
+    cout << "3 - Other Heuristics (fully connected)" << endl;
+    cout << "4 - TSP Solver" << endl;
+    cout << "5 - Exit" << endl;
+    cin >> choice;
     if (dataManager.getDataset() == "Toy-Graphs") {
-        int choice;
-        if (dataManager.getCsv() == "shipping.csv")
-            cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv() << " (not fully connected)" << endl;
-        else if (dataManager.getCsv() == "stadiums.csv" || dataManager.getCsv() == "tourism.csv")
-            cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv() << " (fully connected)" << endl;
-        else
-            cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv() << endl;
-        cout << "\n===== Main Menu =====" << endl;
-        cout << "1 - Backtracking Algorithm" << endl;
-        cout << "2 - Triangular Approximation Heuristic (fully connected)" << endl;
-        cout << "3 - Other Heuristics (fully connected)" << endl;
-        cout << "4 - TSP (not fully connected)" << endl;
-        cout << "5 - Exit" << endl;
-        cin >> choice;
-
         switch (choice) {
-            case 1:
+            case 1: {
+                auto start = chrono::high_resolution_clock::now();
                 dataManager.runBacktrackingAlgorithm(dataManager.getGraph());
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
-            case 2:
-                if (dataManager.getCsv() == "shipping.csv") {
+            }
+            case 2: {
+                if (!isFullyConnected(dataManager.getGraph())) {
                     cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
                          << ") is not fully connected and therefore the Triangular Approximation Heuristic may not work as expected\n";
                     char c = 0;
@@ -44,10 +48,15 @@ void Menu::mainMenu() {
                         }
                     }
                 }
+                auto start = chrono::high_resolution_clock::now();
                 dataManager.TAH(dataManager.getGraph());
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
-            case 3:
-                if (dataManager.getCsv() == "shipping.csv") {
+            }
+            case 3: {
+                if (!isFullyConnected(dataManager.getGraph())) {
                     cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
                          << ") is not fully connected and therefore the Nearest Neighbor Heuristic may not work as expected\n";
                     char c = 0;
@@ -60,11 +69,29 @@ void Menu::mainMenu() {
                         }
                     }
                 }
+                auto start = chrono::high_resolution_clock::now();
                 dataManager.runNearestNeighborHeuristic(dataManager.getGraph());
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
-            case 4:
-                cout << "TSP not implemented yet\n";
+            }
+            case 4: {
+                int startVertex;
+                cout << "Enter the start vertex: " << endl;
+                cin >> startVertex;
+                if (startVertex < 0 || startVertex >= dataManager.getGraph().getNumVertex()) {
+                    cout << "Invalid start vertex, try again (choose a number between 0 and " << dataManager.getNodes().size() << ")" << endl;
+                    mainMenu();
+                }
+                cout << "Processing..." << endl;
+                auto start = chrono::high_resolution_clock::now();
+                dataManager.runTSPSolver(dataManager.getGraph(), startVertex);
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
+            }
             case 5:
                 cout << "\nGoodbye!\n";
                 exit(0);
@@ -75,42 +102,50 @@ void Menu::mainMenu() {
         }
     }
     else if (dataManager.getDataset() == "Real-world Graphs") {
-        int choice;
-        cout << "\n===== Main Menu =====" << endl;
-        cout << "1 - Backtracking Algorithm" << endl;
-        cout << "2 - Triangular Approximation Heuristic (fully connected)" << endl;
-        cout << "3 - Other Heuristics (fully connected)" << endl;
-        cout << "4 - TSP (not fully connected)" << endl;
-        cout << "5 - Exit" << endl;
-        cin >> choice;
 
         switch (choice) {
             case 1: {
+                auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
                 dataManager.runBacktrackingAlgorithm(fullyConnectedGraph);
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
             }
             case 2: {
+                auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
                 dataManager.TAH(fullyConnectedGraph);
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
             }
             case 3: {
+                auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
                 dataManager.runNearestNeighborHeuristic(fullyConnectedGraph);
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
             }
             case 4: {
+                auto start = chrono::high_resolution_clock::now();
                 int startVertex = -1;
                 while (startVertex < 0 || startVertex >= dataManager.getNodes().size()) {
                     cout << "Enter the start vertex: " << endl;
                     cin >> startVertex;
                 }
                 cout << "Processing..." << endl;
-                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
+                dataManager.runTSPSolver(dataManager.getGraph(), startVertex);
+                auto end = chrono::high_resolution_clock::now();
+                auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                printTime(duration);
                 break;
             }
             case 5:
@@ -123,4 +158,27 @@ void Menu::mainMenu() {
         }
     }
     mainMenu();
+}
+
+void printTime(std::chrono::milliseconds time) {
+    long long total_seconds = time.count() / 1000;
+    int minutes, seconds;
+    cout << "Time taken: ";
+    if (total_seconds >= 60) {
+        minutes = (int) total_seconds / 60;
+        seconds = (int) total_seconds % 60;
+        cout << minutes << "m" << seconds << "s" << endl;
+    }
+    else {
+        cout << total_seconds << "s" << endl;
+    }
+}
+
+bool isFullyConnected(const Graph<int>& graph) {
+    for (int i = 0; i < graph.getNumVertex(); i++) {
+        if (graph.getVertexSet()[i]->getAdj().size() != graph.getNumVertex() - 1) {
+            return false;
+        }
+    }
+    return true;
 }

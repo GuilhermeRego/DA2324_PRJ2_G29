@@ -95,7 +95,8 @@ void DataManager::readToy(const string& dataset, const string& csv) {
             graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
-    cout << "Dataset read successfully" << endl;
+    if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
+    else cout << "Dataset read successfully" << endl;
 }
 
 void DataManager::readRealWorld(const string& dataset, const string& selectedGraph) {
@@ -136,12 +137,8 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
-    if (graph.getVertexSet().empty()) {
-        cout << "Error reading dataset" << endl;
-    }
-    else {
-        cout << "Dataset read successfully" << endl;
-    }
+    if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
+    else cout << "Dataset read successfully" << endl;
 }
 
 double haversineDistance(double lat1, double lon1, double lat2, double lon2);
@@ -174,6 +171,51 @@ void DataManager::completeGraph(Graph<int> graph) {
 }
 
 // Useful functions for algorithms
+
+void DataManager::printTourCost(vector<int>& tour) {
+    tour.push_back(tour[0]);
+    cout << "Tour: ";
+    for (int i = 0; i < tour.size(); i++) {
+        cout << tour[i];
+        if (i != tour.size() - 1)
+            cout << " -> ";
+    }
+    cout << endl;
+
+    double cost = 0;
+    bool found;
+    for (int i = 0; i < tour.size() - 2; i++) {
+        found = false;
+        auto vertex1 = graph.findVertex(tour[i]);
+        auto vertex2 = graph.findVertex(tour[i + 1]);
+        for (auto edge : vertex1->getAdj()) {
+            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
+                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
+                cost += edge->getWeight();
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            cout << "Edge not found" << endl;
+        }
+    }
+    found = false;
+    auto first = graph.findVertex(tour[0]);
+    auto last = graph.findVertex(tour[tour.size() - 2]);
+    for (auto edge : last->getAdj()) {
+        if (edge->getDest()->getInfo() == first->getInfo()) {
+            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
+            cost += edge->getWeight();
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "Edge not found" << endl;
+    }
+    cout << "Tour minimum cost: " << cost << endl;
+}
 
 const double EARTH_RADIUS = 6371000; // Earth's radius in meters
 
@@ -256,7 +298,6 @@ void DataManager::runBacktrackingAlgorithm(Graph<int> graph) {
     if (!graph.getVertexSet().empty()) {
         vector<int> bestTour;
         calculateTSPBacktracking(graph, bestTour);
-        bestTour.push_back(0);
         printTourCost(bestTour);
         cout << endl;
     }
@@ -279,7 +320,6 @@ void DataManager::TAH(Graph<int> graph) {
     unordered_set<int> visited;
     int startVertex = 0;
     dfsMST(startVertex, mst, visited, tour);
-    tour.push_back(startVertex);
     printTourCost(tour);
 }
 
@@ -292,40 +332,6 @@ void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visite
             dfsMST(neighbor, mst, visited, tour);
         }
     }
-}
-
-void DataManager::printTourCost(vector<int>& tour) {
-    tour.push_back(0);
-    cout << "Tour: ";
-    for (int i = 0; i < tour.size(); i++) {
-        cout << tour[i];
-        if (i != tour.size() - 1)
-            cout << " -> ";
-    }
-    cout << endl;
-
-    double cost = 0;
-    for (int i = 0; i < tour.size() - 2; i++) {
-        auto vertex1 = graph.findVertex(tour[i]);
-        auto vertex2 = graph.findVertex(tour[i + 1]);
-        for (auto edge : vertex1->getAdj()) {
-            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
-                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
-                cost += edge->getWeight();
-                break;
-            }
-        }
-    }
-    auto first = graph.findVertex(tour[0]);
-    auto last = graph.findVertex(tour[tour.size() - 2]);
-    for (auto edge : last->getAdj()) {
-        if (edge->getDest()->getInfo() == first->getInfo()) {
-            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
-            cost += edge->getWeight();
-            break;
-        }
-    }
-    cout << "Tour minimum cost: " << cost << endl;
 }
 
 
@@ -389,7 +395,6 @@ void DataManager::runNearestNeighborHeuristic(Graph<int> graph) {
 
     if (!graph.getVertexSet().empty()) {
         vector<int> tour = calculateTSPNearestNeighbor(graph);
-        tour.push_back(0);
         printTourCost(tour);
     }
     else {
@@ -401,50 +406,6 @@ void DataManager::runNearestNeighborHeuristic(Graph<int> graph) {
 
 
 // The TSP in the Real-World
-
-void DataManager::runNearestInsertionHeuristic(Graph<int> graph, int startVertex) {
-    if (graph.getVertexSet().empty()) {
-        cout << "Graph data is empty. Please parse the CSV file first.\n";
-        return;
-    }
-
-    vector<bool> visited(graph.getNumVertex(), false);
-    vector<int> tour;
-    tour.push_back(startVertex);
-    visited[startVertex] = true;
-
-    // Enquanto não visitar todos os vértices
-    while (tour.size() < graph.getNumVertex()) {
-        double minDistance = numeric_limits<double>::max();
-        auto current = tour.end();
-        int toInsert = -1;
-
-        // Encontra o vértice não visitado mais próximo de qualquer vértice no tour
-        for (int v = 0; v < graph.getNumVertex(); ++v) {
-            if (!visited[v]) {
-                for (auto it = tour.begin(); it != tour.end(); ++it) {
-                    double weight = getEdgeWeight(graph, *it, v);
-                    if (weight < minDistance) {
-                        minDistance = weight;
-                        current = it;
-                        toInsert = v;
-                    }
-                }
-            }
-        }
-
-        if (toInsert == -1) {
-            cout << "No path exists that returns to the origin and visits all nodes.\n";
-            return;
-        }
-
-        // Inserir o vértice mais próximo no tour
-        tour.insert(next(current), toInsert);
-        visited[toInsert] = true;
-    }
-    tour.push_back(startVertex); // Return to start
-    printTourCost(tour);
-}
 
 vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph, int startVertex) {
     int numVertices = graph.getNumVertex();
@@ -474,10 +435,6 @@ vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph, int startVertex
         currentVertex = nearestNeighbor;
     }
 
-    if (tour.size() == numVertices) { // If all vertices were visited
-        tour.push_back(startVertex); // Return to start if possible
-    }
-
     return tour;
 }
 
@@ -504,7 +461,7 @@ void applyTwoOpt(vector<int>& tour, const Graph<int>& graph) {
     }
 }
 
-void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
+void DataManager::runTSPSolver(Graph<int> graph, int startVertex) {
     if (graph.getVertexSet().empty()) {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
         return;
@@ -512,6 +469,5 @@ void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
 
     vector<int> tour = calculateTSPNearestNeighbor(graph, startVertex);
     applyTwoOpt(tour, graph);
-    tour.push_back(startVertex); // Return to start
     printTourCost(tour);
 }
