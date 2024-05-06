@@ -30,8 +30,7 @@ class DataManager {
         void printTourCost(vector<int>& tour);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
-        void runNearestInsertionHeuristic(Graph<int> graph, int startVertex);
-        void runEfficientTSP(Graph<int> graph, int startVertex);
+        void runTSPSolver(Graph<int> graph, int startVertex);
 
     void printTourCost2(vector<int> &tour, int startVertex);
 
@@ -40,8 +39,6 @@ private:
         string dataset_;
         string csv_;
         unordered_map<int, Node> nodes;
-
-
 };
 
 #endif
