@@ -1,7 +1,8 @@
 #include "Menu.h"
 #include <chrono>
+#include <stack>
 
-void printTime(std::chrono::milliseconds time);
+void printTime(chrono::milliseconds time);
 bool isFullyConnected(const Graph<int>& graph);
 
 Menu::Menu() {
@@ -24,7 +25,7 @@ void Menu::mainMenu() {
     cout << "4 - TSP Solver" << endl;
     cout << "5 - Exit" << endl;
     cin >> choice;
-    if (dataManager.getDataset() == "Toy-Graphs") {
+    if (dataManager.getDataset() == "Toy-Graphs" || dataManager.getDataset() == "Extra_Fully_Connected_Graphs") {
         switch (choice) {
             case 1: {
                 auto start = chrono::high_resolution_clock::now();
@@ -81,12 +82,12 @@ void Menu::mainMenu() {
                 cout << "Enter the start vertex: " << endl;
                 cin >> startVertex;
                 if (startVertex < 0 || startVertex >= dataManager.getGraph().getNumVertex()) {
-                    cout << "Invalid start vertex, try again (choose a number between 0 and " << dataManager.getNodes().size() << ")" << endl;
+                    cout << "Invalid start vertex, try again (choose a number between 0 and " << dataManager.getGraph().getNumVertex() << ")" << endl;
                     mainMenu();
                 }
                 cout << "Processing..." << endl;
                 auto start = chrono::high_resolution_clock::now();
-                dataManager.runTSPSolver(dataManager.getGraph(), startVertex);
+                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
                 printTime(duration);
@@ -142,7 +143,7 @@ void Menu::mainMenu() {
                     cin >> startVertex;
                 }
                 cout << "Processing..." << endl;
-                dataManager.runTSPSolver(dataManager.getGraph(), startVertex);
+                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
                 printTime(duration);
@@ -160,7 +161,7 @@ void Menu::mainMenu() {
     mainMenu();
 }
 
-void printTime(std::chrono::milliseconds time) {
+void printTime(chrono::milliseconds time) {
     long long total_seconds = time.count() / 1000;
     int minutes, seconds;
     cout << "Time taken: ";
@@ -176,9 +177,7 @@ void printTime(std::chrono::milliseconds time) {
 
 bool isFullyConnected(const Graph<int>& graph) {
     for (int i = 0; i < graph.getNumVertex(); i++) {
-        if (graph.getVertexSet()[i]->getAdj().size() != graph.getNumVertex() - 1) {
-            return false;
-        }
+        if (graph.getVertexSet()[i]->getAdj().size() != graph.getNumVertex() - 1) return false;
     }
     return true;
 }

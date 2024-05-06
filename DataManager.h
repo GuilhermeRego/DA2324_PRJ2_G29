@@ -14,6 +14,7 @@ class DataManager {
     public:
         DataManager();
         void readToy(const string& dataset, const string& csv);
+        void readExtra(const string &edges);
         void readRealWorld(const string& basicString, const string& basicString1);
 
         string getCsv() { return csv_; }
@@ -27,18 +28,16 @@ class DataManager {
 
         void TAH(Graph<int> graph);
         void completeGraph(Graph<int> graph);
-        void printTourCost(vector<int>& tour);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
-        void runTSPSolver(Graph<int> graph, int startVertex);
+        void runEfficientTSP(Graph<int> graph, int startVertex);
+        void printTourCost(vector<int> &tour);
 
-    void printTourCost2(vector<int> &tour, int startVertex);
-
-private:
-        Graph<int> graph;
-        string dataset_;
-        string csv_;
-        unordered_map<int, Node> nodes;
+    private:
+            Graph<int> graph;
+            string dataset_;
+            string csv_;
+            unordered_map<int, Node> nodes;
 };
 
 #endif

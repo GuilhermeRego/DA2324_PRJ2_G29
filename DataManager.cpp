@@ -13,7 +13,7 @@ using namespace std;
 // Parse of data from csv files
 
 DataManager::DataManager() {
-    string dataset, csv, selectedGraph;
+    string dataset, csv, selectedGraph, edges;
     cout << "Choose the dataset: " << endl;
     cout << "1 - Toy-Graphs" << endl;
     cout << "2 - Extra_Fully_Connected_Graphs" << endl;
@@ -41,7 +41,26 @@ DataManager::DataManager() {
         readToy(dataset, csv);
     }
     else if (dataset == "2") {
-        cout << "Not implemented yet" << endl;
+        cout << "Choose the graph's number of edges between the following options:" << endl;
+        int options[12] = {25, 50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900};
+        for (int i = 0; i < 12; i++) {
+            cout << i + 1 << " - " << options[i] << " edges" << endl;
+        }
+        while (cin >> edges) {
+            try {
+                if (stoi(edges) < 1 || stoi(edges) > 12) {
+                    cout << "Invalid number of edges" << endl;
+                }
+                else {
+                    edges = to_string(options[stoi(edges) - 1]);
+                    break;
+                }
+            }
+            catch (invalid_argument& e) {
+                cout << "Invalid input" << endl;
+            }
+        }
+        readExtra(edges);
     }
     else if (dataset == "3") {
         dataset = "Real-world Graphs";
@@ -99,11 +118,55 @@ void DataManager::readToy(const string& dataset, const string& csv) {
     else cout << "Dataset read successfully" << endl;
 }
 
+void DataManager::readExtra(const string& edges) {
+    dataset_ = "Extra_Fully_Connected_Graphs";
+    csv_ = "edges_" + edges + ".csv";
+    string nodesPath = "../data/Extra_Fully_Connected_Graphs/nodes.csv";
+    ifstream file(nodesPath);
+    string line;
+    if (!file.is_open()) {
+        cout << "Error opening file" << endl;
+    }
+    else {
+        getline(file, line);
+        while (getline(file, line)) {
+            string id, longitude, latitude;
+            istringstream iss(line);
+            getline(iss, id, ',');
+            getline(iss, longitude, ',');
+            getline(iss, latitude, ',');
+            nodes.insert(make_pair(stoi(id), Node(stoi(id), stod(longitude), stod(latitude))));
+        }
+    }
+
+    string edgesPath = "../data/Extra_Fully_Connected_Graphs/edges_" + edges + ".csv";
+    ifstream file2(edgesPath);
+    if (!file2.is_open()) {
+        cout << "Error opening file" << endl;
+    }
+    else {
+        while (getline(file2, line)) {
+            string source, dest, weight;
+            istringstream iss(line);
+            getline(iss, source, ',');
+            getline(iss, dest, ',');
+            getline(iss, weight, ',');
+            graph.addVertex(stoi(source));
+            graph.addVertex(stoi(dest));
+            graph.addEdge(stoi(source), stoi(dest), stod(weight));
+            graph.addEdge(stoi(dest), stoi(source), stod(weight));
+        }
+    }
+    if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
+    else cout << "Dataset read successfully" << endl;
+}
+
 void DataManager::readRealWorld(const string& dataset, const string& selectedGraph) {
     string path = "../data/" + dataset + "/" + selectedGraph + "/nodes.csv";
     ifstream file(path);
     string line;
     dataset_ = dataset;
+    csv_ = selectedGraph;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -479,40 +542,6 @@ double calculateTourCost(const Graph<int>& graph, const vector<int>& tour) {
     return cost;
 }
 
-void DataManager::printTourCost2(vector<int>& tour, int startVertex) {
-    tour.push_back(startVertex);
-    cout << "Tour: ";
-    for (int i = 0; i < tour.size(); i++) {
-        cout << tour[i];
-        if (i != tour.size() - 1)
-            cout << " -> ";
-    }
-    cout << endl;
-
-    double cost = 0;
-    for (int i = 0; i < tour.size() - 2; i++) {
-        auto vertex1 = graph.findVertex(tour[i]);
-        auto vertex2 = graph.findVertex(tour[i + 1]);
-        for (auto edge : vertex1->getAdj()) {
-            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
-                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
-                cost += edge->getWeight();
-                break;
-            }
-        }
-    }
-    auto first = graph.findVertex(tour[0]);
-    auto last = graph.findVertex(tour[tour.size() - 2]);
-    for (auto edge : last->getAdj()) {
-        if (edge->getDest()->getInfo() == first->getInfo()) {
-            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
-            cost += edge->getWeight();
-            break;
-        }
-    }
-    cout << "Tour minimum cost: " << cost << endl;
-}
-
 void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
     if (graph.getVertexSet().empty()) {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
@@ -541,14 +570,14 @@ void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
     if (bestTour.empty() || bestTour.size() < graph.getNumVertex()) {
         cout << "No path exists that returns to the origin and visits all nodes.\n";
     } else {
-        printTourCost2(bestTour,startVertex);
+        printTourCost(bestTour);
     }
 }
 
 
 
 
- void DataManager::runNearestInsertionHeuristic(Graph<int> graph, int startVertex) {
+ /*void DataManager::runNearestInsertionHeuristic(Graph<int> graph, int startVertex) {
     if (graph.getVertexSet().empty()) {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
         return;
@@ -590,3 +619,4 @@ void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
     }
     printTourCost(tour);
 }
+  */
