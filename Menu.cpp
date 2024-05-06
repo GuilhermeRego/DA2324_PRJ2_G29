@@ -63,8 +63,16 @@ void Menu::mainMenu() {
                 dataManager.runNearestNeighborHeuristic(dataManager.getGraph());
                 break;
             case 4:
-                cout << "TSP not implemented yet\n";
+            {
+                int startVertex = -1;
+                while (startVertex < 0 || startVertex >= dataManager.getGraph().getNumVertex()) {
+                    cout << "Enter the start vertex: " << endl;
+                    cin >> startVertex;
+                }
+                cout << "Processing..." << endl;
+                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
                 break;
+            }
             case 5:
                 cout << "\nGoodbye!\n";
                 exit(0);

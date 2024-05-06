@@ -33,11 +33,14 @@ class DataManager {
         void runNearestInsertionHeuristic(Graph<int> graph, int startVertex);
         void runEfficientTSP(Graph<int> graph, int startVertex);
 
+    void printTourCost2(vector<int> &tour, int startVertex);
+
 private:
         Graph<int> graph;
         string dataset_;
         string csv_;
         unordered_map<int, Node> nodes;
+
 
 };
 
