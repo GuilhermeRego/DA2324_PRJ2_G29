@@ -30,11 +30,13 @@ class DataManager {
         void completeGraph(Graph<int> graph);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
-        void runEfficientTSP(Graph<int> graph, int startVertex);
+
         void printTourCost(vector<int> &tour);
 
         void start();
         void clean();
+
+        void runModifiedDFS(Graph<int> graph, int startVertex);
 
     private:
             Graph<int> graph;
@@ -42,6 +44,8 @@ class DataManager {
             string subDirectory;
             unordered_map<int, Node> nodes;
 
+
+    void printTourCostModified(vector<int> &tour);
 };
 
 #endif

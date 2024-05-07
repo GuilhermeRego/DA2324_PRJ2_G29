@@ -494,155 +494,94 @@ void DataManager::runNearestNeighborHeuristic(Graph<int> graph) {
 
 
 
+
+
 // The TSP in the Real-World
+void DataManager::printTourCostModified(vector<int>& tour) {
+    cout << "Tour: ";
+    for (int i = 0; i < tour.size(); i++) {
+        cout << tour[i];
+        if (i != tour.size() - 1)
+            cout << " -> ";
+    }
+    // Add the edge from the last vertex to the start vertex
+    cout << " -> " << tour[0] << endl;
 
-vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph, int startVertex) {
-    int numVertices = graph.getNumVertex();
-    vector<bool> visited(numVertices, false);
-    vector<int> tour;
-    tour.reserve(numVertices + 1); // +1 to allow return to start
-    tour.push_back(startVertex);
-    visited[startVertex] = true;
-    int currentVertex = startVertex;
-
-    while (tour.size() < numVertices) {
-        int nearestNeighbor = -1;
-        double minDistance = numeric_limits<double>::max();
-
-        for (const auto &edge : graph.findVertex(currentVertex)->getAdj()) {
-            int neighbor = edge->getDest()->getInfo();
-            if (!visited[neighbor] && edge->getWeight() < minDistance) {
-                minDistance = edge->getWeight();
-                nearestNeighbor = neighbor;
+    double cost = 0;
+    bool found;
+    for (int i = 0; i < tour.size() - 1; i++) {
+        found = false;
+        auto vertex1 = graph.findVertex(tour[i]);
+        auto vertex2 = graph.findVertex(tour[i + 1]);
+        for (auto edge : vertex1->getAdj()) {
+            if (edge->getDest()->getInfo() == vertex2->getInfo()) {
+                cout << "Edge: " << vertex1->getInfo() << " -> " << vertex2->getInfo() << " Weight: " << edge->getWeight() << endl;
+                cost += edge->getWeight();
+                found = true;
+                break;
             }
         }
-
-        if (nearestNeighbor == -1) break; // No more reachable neighbors
-
-        tour.push_back(nearestNeighbor);
-        visited[nearestNeighbor] = true;
-        currentVertex = nearestNeighbor;
-    }
-
-    return tour;
-}
-
-void applyTwoOpt(vector<int>& tour, const Graph<int>& graph) {
-    bool improved = true;
-    while (improved) {
-        improved = false;
-        for (size_t i = 1; i < tour.size() - 2; ++i) {
-            for (size_t j = i + 1; j < tour.size() - 1; ++j) {
-                int a = tour[i - 1];
-                int b = tour[i];
-                int c = tour[j];
-                int d = tour[j + 1];
-
-                double currentDist = getEdgeWeight(graph, a, b) + getEdgeWeight(graph, c, d);
-                double newDist = getEdgeWeight(graph, a, c) + getEdgeWeight(graph, b, d);
-
-                if (newDist < currentDist) {
-                    reverse(tour.begin() + i, tour.begin() + j + 1);
-                    improved = true;
-                }
-            }
+        if (!found) {
+            cout << "Edge not found" << endl;
         }
     }
-}
-
-double calculateTourCost(const Graph<int>& graph, const vector<int>& tour) {
-    double cost = 0.0;
-    for (size_t i = 0; i < tour.size() - 1; ++i) {
-        int vertex1 = tour[i];
-        int vertex2 = tour[i + 1];
-        if (hasEdge(graph.findVertex(vertex1), graph.findVertex(vertex2))) {
-            cost += getEdgeWeight(graph,vertex1, vertex2);
-        } else {
-            // Handle case where there is no edge between vertex1 and vertex2
-            // For TSP, this should not occur if the tour is valid
-            cout << "Warning: No edge between vertex " << vertex1 << " and vertex " << vertex2 << endl;
+    // Check for the edge from the last vertex to the start vertex
+    found = false;
+    auto first = graph.findVertex(tour[0]);
+    auto last = graph.findVertex(tour[tour.size() - 1]);
+    for (auto edge : last->getAdj()) {
+        if (edge->getDest()->getInfo() == first->getInfo()) {
+            cout << "Edge: " << last->getInfo() << " -> " << first->getInfo() << " Weight: " << edge->getWeight() << endl;
+            cost += edge->getWeight();
+            found = true;
+            break;
         }
     }
-    // Add cost of returning to the start vertex
-    cost += getEdgeWeight(graph,tour.back(), tour.front());
-    return cost;
+    if (!found) {
+        cout << "Edge not found" << endl;
+    }
+    cout << "Tour cost: " << cost << endl;
 }
 
-void DataManager::runEfficientTSP(Graph<int> graph, int startVertex) {
-    if (graph.getVertexSet().empty()) {
-        cout << "Graph data is empty. Please parse the CSV file first.\n";
-        return;
-    }
-
-    vector<int> bestTour;
-    double bestTourCost = numeric_limits<double>::max();
-
-    for (auto endVertex : graph.getVertexSet()) {
-        if (endVertex->getInfo() == startVertex) continue;
-
-        vector<int> tour = calculateTSPNearestNeighbor(graph, startVertex);
-        applyTwoOpt(tour, graph);
-
-        // Check if there is an edge from the last vertex back to the startVertex
-        if (hasEdge(graph.findVertex(startVertex), graph.findVertex(tour.back()))) {
-            double tourCost = calculateTourCost(graph, tour);
-            if (tourCost < bestTourCost) {
+void dfsTSP(int vertex, Graph<int>& graph, unordered_set<int>& visited, vector<int>& tour, vector<int>& bestTour, double& minCost, double currentCost) {
+    visited.insert(vertex);
+    tour.push_back(vertex);
+    if (visited.size() == graph.getNumVertex()) {
+        if (hasEdge(graph.findVertex(tour.back()), graph.findVertex(tour.front()))) {
+            currentCost += getEdgeWeight(graph, tour.back(), tour.front());
+            if (currentCost < minCost) {
+                minCost = currentCost;
                 bestTour = tour;
-                bestTourCost = tourCost;
+            }
+        }
+    } else {
+        for (auto adjEdge : graph.findVertex(vertex)->getAdj()) {
+            auto neighbor = adjEdge->getDest()->getInfo();
+            if (visited.find(neighbor) == visited.end()) {
+                dfsTSP(neighbor, graph, visited, tour, bestTour, minCost, currentCost + adjEdge->getWeight());
             }
         }
     }
-
-    if (bestTour.empty() || bestTour.size() < graph.getNumVertex()) {
-        cout << "No path exists that returns to the origin and visits all nodes.\n";
-    } else {
-        printTourCost(bestTour);
-    }
+    visited.erase(vertex);
+    tour.pop_back();
 }
 
-
-
-
- /*void DataManager::runNearestInsertionHeuristic(Graph<int> graph, int startVertex) {
+void DataManager::runModifiedDFS(Graph<int> graph, int startVertex) {
     if (graph.getVertexSet().empty()) {
         cout << "Graph data is empty. Please parse the CSV file first.\n";
         return;
     }
 
-    vector<bool> visited(graph.getNumVertex(), false);
+    unordered_set<int> visited;
     vector<int> tour;
-    tour.push_back(startVertex);
-    visited[startVertex] = true;
+    vector<int> bestTour;
+    double minCost = numeric_limits<double>::max();
+    dfsTSP(startVertex, graph, visited, tour, bestTour, minCost, 0);
 
-    // Enquanto não visitar todos os vértices
-    while (tour.size() < graph.getNumVertex()) {
-        double minDistance = numeric_limits<double>::max();
-        auto current = tour.end();
-        int toInsert = -1;
-
-        // Encontra o vértice não visitado mais próximo de qualquer vértice no tour
-        for (int v = 0; v < graph.getNumVertex(); ++v) {
-            if (!visited[v]) {
-                for (auto it = tour.begin(); it != tour.end(); ++it) {
-                    double weight = getEdgeWeight(graph, *it, v);
-                    if (weight < minDistance) {
-                        minDistance = weight;
-                        current = it;
-                        toInsert = v;
-                    }
-                }
-            }
-        }
-
-        if (toInsert == -1) {
-            cout << "No path exists that returns to the origin and visits all nodes.\n";
-            return;
-        }
-
-        // Inserir o vértice mais próximo no tour
-        tour.insert(next(current), toInsert);
-        visited[toInsert] = true;
+    if (!bestTour.empty() && bestTour.front() == startVertex &&
+        hasEdge(graph.findVertex(bestTour.back()), graph.findVertex(bestTour.front()))) {
+        printTourCostModified(bestTour);
+    } else {
+        cout << "No path exists that returns to the origin and visits all nodes.\n";
     }
-    printTourCost(tour);
 }
-  */

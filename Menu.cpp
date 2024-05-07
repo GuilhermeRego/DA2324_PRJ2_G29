@@ -88,7 +88,7 @@ void Menu::mainMenu() {
                 }
                 cout << "Processing..." << endl;
                 auto start = chrono::high_resolution_clock::now();
-                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
+                dataManager.runModifiedDFS(dataManager.getGraph(), startVertex);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
                 printTime(duration);
@@ -148,7 +148,7 @@ void Menu::mainMenu() {
                     cin >> startVertex;
                 }
                 cout << "Processing..." << endl;
-                dataManager.runEfficientTSP(dataManager.getGraph(), startVertex);
+                dataManager.runModifiedDFS(dataManager.getGraph(), startVertex);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
                 printTime(duration);
