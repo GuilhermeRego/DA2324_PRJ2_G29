@@ -83,7 +83,7 @@ void Menu::mainMenu() {
                 cout << "Enter the start vertex: " << endl;
                 cin >> startVertex;
                 if (startVertex < 0 || startVertex >= dataManager.getGraph().getNumVertex()) {
-                    cout << "Invalid start vertex, try again (choose a number between 0 and " << dataManager.getGraph().getNumVertex() << ")" << endl;
+                    cout << "Invalid start vertex, try again (choose a number between 0 and " << dataManager.getGraph().getNumVertex() - 1 << ")" << endl;
                     mainMenu();
                 }
                 cout << "Processing..." << endl;
