@@ -20,14 +20,15 @@ class DataManager {
         string getCsv() { return subDirectory; }
         string getDataset() { return directory; }
         unordered_map<int, Node> getNodes() { return nodes; }
-        Graph<int> getGraph() {return graph;}
+        Graph<int> getGraph() { return graph; }
+        void setGraph(Graph<int> graph) { this->graph = graph; }
 
         static void calculateTSPBacktracking(const Graph<int>& graph, vector<int> &bestTour);
         void runBacktrackingAlgorithm(Graph<int> graph);
         void runNearestNeighborHeuristic(Graph<int> graph);
 
         void TAH(Graph<int> graph);
-        void completeGraph(Graph<int> graph);
+        void completeGraph(Graph<int>& graph);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
         void runEfficientTSP(Graph<int> graph, int startVertex);

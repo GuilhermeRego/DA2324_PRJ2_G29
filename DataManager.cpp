@@ -209,27 +209,16 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
 }
 
 double haversineDistance(double lat1, double lon1, double lat2, double lon2);
+bool hasEdge(const Vertex<int>* source, const Vertex<int>* dest);
 
-void DataManager::completeGraph(Graph<int> graph) {
-    bool found = false;
-    for (auto node1: graph.getVertexSet()) {
-        for (auto node2: graph.getVertexSet()) {
-            if (node1->getInfo() != node2->getInfo()) {
-                for (auto adjEdgeNode1: node1->getAdj()) {
-                    if (adjEdgeNode1->getDest()->getInfo() == node2->getInfo()) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    double latitude1 = nodes.find(node1->getInfo())->second.getLatitude();
-                    double longitude1 = nodes.find(node1->getInfo())->second.getLongitude();
-                    double latitude2 = nodes.find(node2->getInfo())->second.getLatitude();
-                    double longitude2 = nodes.find(node2->getInfo())->second.getLongitude();
-                    double distance = haversineDistance(latitude1, longitude1, latitude2, longitude2);
-                    graph.addEdge(node1->getInfo(), node2->getInfo(), distance);
-                }
-                found = false;
+void DataManager::completeGraph(Graph<int>& graph) {
+    for (auto node1 : graph.getVertexSet()) {
+        for (auto edge : node1->getAdj()) {
+            auto node2 = edge->getDest();
+            if (!hasEdge(node2, node1) || !hasEdge(node1, node2)) {
+                double weight = haversineDistance(nodes.at(node1->getInfo()).getLatitude(), nodes.at(node1->getInfo()).getLongitude(),
+                                                  nodes.at(node2->getInfo()).getLatitude(), nodes.at(node2->getInfo()).getLongitude());
+                graph.addEdge(node2->getInfo(), node1->getInfo(), weight);
             }
 
         }
@@ -249,10 +238,6 @@ void DataManager::clean() {
     directory = "";
     subDirectory = "";
 }
-
-
-
-
 
 
 
