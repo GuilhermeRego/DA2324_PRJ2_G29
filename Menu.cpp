@@ -24,7 +24,8 @@ void Menu::mainMenu() {
     cout << "3 - Other Heuristics (fully connected)" << endl;
     cout << "4 - TSP Solver" << endl;
     cout << "5 - Change dataset" << endl;
-    cout << "6 - Exit" << endl;
+    cout << "6 - Complete the graph" << endl;
+    cout << "7 - Exit" << endl;
     cin >> choice;
     if (dataManager.getDataset() == "Toy-Graphs" || dataManager.getDataset() == "Extra_Fully_Connected_Graphs") {
         switch (choice) {
@@ -98,7 +99,28 @@ void Menu::mainMenu() {
                 dataManager.clean();
                 dataManager.start();
                 break;
-            case 6:
+            case 6: {
+                if (isFullyConnected(dataManager.getGraph())) {
+                    cout << "Graph is already fully connected" << endl;
+                    break;
+                }
+                else {
+                    for (auto vertex : dataManager.getGraph().getVertexSet()) {
+                        cout << vertex->getAdj().size() << " ";
+                    }
+                    cout << endl;
+                    Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
+                    dataManager.completeGraph(fullyConnectedGraph);
+                    dataManager.setGraph(fullyConnectedGraph);
+                    for (auto vertex : fullyConnectedGraph.getVertexSet()) {
+                        cout << vertex->getAdj().size() << " ";
+                    }
+                    if (isFullyConnected(fullyConnectedGraph)) cout << "Graph is now fully connected" << endl;
+                    else cout << "Error completing the graph" << endl;
+                    break;
+                }
+            }
+            case 7:
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:
@@ -155,7 +177,8 @@ void Menu::mainMenu() {
                 break;
             }
             case 5:
-                // TODO
+                dataManager.clean();
+                dataManager.start();
                 break;
             case 6:
                 cout << "\nGoodbye!\n";
