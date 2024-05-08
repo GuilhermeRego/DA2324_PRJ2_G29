@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <list>
 #include "Node.h"
+#include <chrono>
+#include "Menu.h"
 
 using namespace std;
 
@@ -17,87 +19,81 @@ DataManager::DataManager() {
 }
 
 void DataManager::start() {
-    string dataset, csv, selectedGraph, edges;
-    cout << "Choose the dataset: " << endl;
-    cout << "1 - Toy-Graphs" << endl;
-    cout << "2 - Extra_Fully_Connected_Graphs" << endl;
-    cout << "3 - Real-world Graphs" << endl;
-    cin >> dataset;
-    if (dataset == "1") {
-        dataset = "Toy-Graphs";
-        cout << "Enter the csv file: " << endl;
-        cout << "1 - shipping.csv" << endl;
-        cout << "2 - stadiums.csv" << endl;
-        cout << "3 - tourism.csv" << endl;
-        cin >> csv;
-        if (csv == "1") {
-            csv = "shipping.csv";
-        }
-        else if (csv == "2") {
-            csv = "stadiums.csv";
-        }
-        else if (csv == "3") {
-            csv = "tourism.csv";
-        }
-        else {
-            cout << "Invalid csv file" << endl;
-        }
-        readToy(dataset, csv);
+    string dataset;
+    while (dataset < "1" || dataset > "3") {
+        cout << "Choose a dataset:\n"
+             << "1 - Toy-Graphs\n"
+             << "2 - Real-world Graphs\n"
+             << "3 - Extra_Fully_Connected_Graphs\n";
+        cin >> dataset;
     }
-    else if (dataset == "2") {
-        cout << "Choose the graph's number of edges between the following options:" << endl;
-        int options[12] = {25, 50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900};
-        for (int i = 0; i < 12; i++) {
-            cout << i + 1 << " - " << options[i] << " edges" << endl;
-        }
-        while (cin >> edges) {
-            try {
-                if (stoi(edges) < 1 || stoi(edges) > 12) {
-                    cout << "Invalid number of edges" << endl;
-                }
-                else {
-                    edges = to_string(options[stoi(edges) - 1]);
+    switch (dataset[0]) {
+        case '1': {
+            string csv;
+            while (csv < "1" || csv > "3") {
+                cout << "Choose a csv file:\n"
+                     << "1 - shipping.csv\n"
+                     << "2 - stadiums.csv\n"
+                     << "3 - tourism.csv\n";
+                cin >> csv;
+            }
+            directory = "Toy-Graphs";
+            switch (csv[0]) {
+                case '1':
+                    subDirectory = "shipping.csv";
                     break;
+                case '2':
+                    subDirectory = "stadiums.csv";
+                    break;
+                case '3':
+                    subDirectory = "tourism.csv";
+                    break;
+                default:
+                    cout << "Unexpected error" << endl;
+                    break;
+            }
+            readToy(directory, subDirectory);
+            break;
+        }
+        case 2: {
+            string edges;
+            string edgesAvailable[12] = {"25", "50", "75", "100", "200", "300", "400", "500", "600", "700", "800", "900"};
+            while (edges < "1" || edges > "12") {
+                cout << "Choose the number of edges:\n";
+                for (int i = 0; i < 12; i++) {
+                    cout << i + 1 << " - " << edgesAvailable[i] << " edges\n";
                 }
+                cin >> edges;
             }
-            catch (invalid_argument& e) {
-                cout << "Invalid input" << endl;
+            directory = "Extra_Fully_Connected_Graphs";
+            subDirectory = "edges_" + edgesAvailable[stoi(edges) - 1] + ".csv";
+            readExtra(edgesAvailable[stoi(edges) - 1]);
+            break;
+        }
+        case 3: {
+            string selectedGraph;
+            while (selectedGraph < "1" || selectedGraph > "3") {
+                cout << "Choose a graph:\n"
+                     << "1 - graph1\n"
+                     << "2 - graph2\n"
+                     << "3 - graph3\n";
+                cin >> selectedGraph;
             }
+            directory = "Real-world Graphs";
+            subDirectory = "graph" + selectedGraph;
+            break;
         }
-        readExtra(edges);
-    }
-    else if (dataset == "3") {
-        dataset = "Real-world Graphs";
-        cout << "Enter the graph:" << endl;
-        cout << "1 - graph1" << endl;
-        cout << "2 - graph2" << endl;
-        cout << "3 - graph3" << endl;
-        cin >> selectedGraph;
-        if (selectedGraph == "1") {
-            selectedGraph = "graph1";
-        }
-        else if (selectedGraph == "2") {
-            selectedGraph = "graph2";
-        }
-        else if (selectedGraph == "3") {
-            selectedGraph = "graph3";
-        }
-        else {
-            cout << "Invalid graph" << endl;
-        }
-        readRealWorld(dataset, selectedGraph);
-    }
-    else {
-        cout << "Invalid dataset" << endl;
+        default:
+            cout << "Unexpected error" << endl;
+            break;
     }
 }
 
 void DataManager::readToy(const string& dataset, const string& csv) {
+    chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
     string path = "../data/" + dataset + "/" + csv;
     ifstream file(path);
     string line;
-    directory = dataset;
-    subDirectory = csv;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -120,11 +116,12 @@ void DataManager::readToy(const string& dataset, const string& csv) {
     }
     if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
     else cout << "Dataset read successfully" << endl;
+    chrono::high_resolution_clock::time_point end = chrono::high_resolution_clock::now();
+    Menu::printTime(chrono::duration_cast<chrono::milliseconds>(end - start));
 }
 
 void DataManager::readExtra(const string& edges) {
-    directory = "Extra_Fully_Connected_Graphs";
-    subDirectory = "edges_" + edges + ".csv";
+    chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
     string nodesPath = "../data/Extra_Fully_Connected_Graphs/nodes.csv";
     ifstream file(nodesPath);
     string line;
@@ -163,14 +160,16 @@ void DataManager::readExtra(const string& edges) {
     }
     if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
     else cout << "Dataset read successfully" << endl;
+    chrono::high_resolution_clock::time_point end = chrono::high_resolution_clock::now();
+    Menu::printTime(chrono::duration_cast<chrono::milliseconds>(end - start));
 }
 
 void DataManager::readRealWorld(const string& dataset, const string& selectedGraph) {
+    chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
+
     string path = "../data/" + dataset + "/" + selectedGraph + "/nodes.csv";
     ifstream file(path);
     string line;
-    directory = dataset;
-    subDirectory = selectedGraph;
     if (!file.is_open()) {
         cout << "Error opening file" << endl;
     }
@@ -183,12 +182,16 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, longitude, ',');
             getline(iss, latitude, ',');
             nodes.insert(make_pair(stoi(id), Node(stoi(id), stod(longitude), stod(latitude))));
+            graph.addVertex(stoi(id));
         }
     }
+
     path = "../data/" + dataset + "/" + selectedGraph + "/edges.csv";
     ifstream file2(path);
+    directory = dataset;
+    subDirectory = selectedGraph;
     if (!file2.is_open()) {
-        cout << "Error opening file" << endl;
+        cout << "Error opening file2" << endl;
     }
     else {
         getline(file2, line);
@@ -198,32 +201,29 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, source, ',');
             getline(iss, dest, ',');
             getline(iss, weight, ',');
-            graph.addVertex(stoi(source));
-            graph.addVertex(stoi(dest));
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
             graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
     }
     if (graph.getVertexSet().empty()) cout << "Error reading dataset" << endl;
     else cout << "Dataset read successfully" << endl;
+
+    chrono::high_resolution_clock::time_point end = chrono::high_resolution_clock::now();
+    Menu::printTime(chrono::duration_cast<chrono::milliseconds>(end - start));
 }
 
 double haversineDistance(double lat1, double lon1, double lat2, double lon2);
 bool hasEdge(const Vertex<int>* source, const Vertex<int>* dest);
 
-void DataManager::completeGraph(Graph<int>& graph) {
-    for (auto node1 : graph.getVertexSet()) {
-        for (auto edge : node1->getAdj()) {
-            auto node2 = edge->getDest();
-            if (!hasEdge(node2, node1) || !hasEdge(node1, node2)) {
-                double weight = haversineDistance(nodes.at(node1->getInfo()).getLatitude(), nodes.at(node1->getInfo()).getLongitude(),
-                                                  nodes.at(node2->getInfo()).getLatitude(), nodes.at(node2->getInfo()).getLongitude());
-                graph.addEdge(node2->getInfo(), node1->getInfo(), weight);
+void DataManager::completeGraph(Graph<int>& notFullyConnectedGraph) {
+    for (auto node1 : notFullyConnectedGraph.getVertexSet()) {
+        for (auto node2 : notFullyConnectedGraph.getVertexSet()) {
+            if (node1 != node2 && !hasEdge(node1, node2)) {
+                double weight = haversineDistance(nodes.at(node1->getInfo()).getLatitude(), nodes.at(node1->getInfo()).getLongitude(), nodes.at(node2->getInfo()).getLatitude(), nodes.at(node2->getInfo()).getLongitude());
+                notFullyConnectedGraph.addEdge(node1->getInfo(), node2->getInfo(), weight);
             }
-
         }
     }
-    cout << "Graph completed successfully" << endl;
 }
 
 void DataManager::clean() {

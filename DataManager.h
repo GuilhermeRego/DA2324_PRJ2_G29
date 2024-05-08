@@ -20,7 +20,7 @@ class DataManager {
         string getCsv() { return subDirectory; }
         string getDataset() { return directory; }
         unordered_map<int, Node> getNodes() { return nodes; }
-        Graph<int> getGraph() { return graph; }
+        Graph<int>& getGraph() { return (Graph<int> &) graph; }
         void setGraph(Graph<int> graph) { this->graph = graph; }
 
         static void calculateTSPBacktracking(const Graph<int>& graph, vector<int> &bestTour);
@@ -28,11 +28,12 @@ class DataManager {
         void runNearestNeighborHeuristic(Graph<int> graph);
 
         void TAH(Graph<int> graph);
-        void completeGraph(Graph<int>& graph);
+        void completeGraph(Graph<int>& notFullyConnectedGraph);
         void dfsMST(int vertex, Graph<int> &mst, unordered_set<int> &visited, vector<int> &tour);
 
 
         void printTourCost(vector<int> &tour);
+        void printTourCostModified(vector<int> &tour);
 
         void start();
         void clean();
@@ -44,9 +45,6 @@ class DataManager {
             string directory;
             string subDirectory;
             unordered_map<int, Node> nodes;
-
-
-    void printTourCostModified(vector<int> &tour);
 };
 
 #endif
