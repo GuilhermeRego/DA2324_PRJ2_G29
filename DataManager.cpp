@@ -50,12 +50,27 @@ void DataManager::start() {
                     break;
                 default:
                     cout << "Unexpected error" << endl;
+                    exit(1);
                     break;
             }
             readToy(directory, subDirectory);
             break;
         }
-        case 2: {
+        case '2': {
+            string selectedGraph;
+            while (selectedGraph < "1" || selectedGraph > "3") {
+                cout << "Choose a graph:\n"
+                     << "1 - graph1\n"
+                     << "2 - graph2\n"
+                     << "3 - graph3\n";
+                cin >> selectedGraph;
+            }
+            directory = "Real-world Graphs";
+            subDirectory = "graph" + selectedGraph;
+            readRealWorld(directory, subDirectory);
+            break;
+        }
+        case '3': {
             string edges;
             string edgesAvailable[12] = {"25", "50", "75", "100", "200", "300", "400", "500", "600", "700", "800", "900"};
             while (edges < "1" || edges > "12") {
@@ -70,21 +85,9 @@ void DataManager::start() {
             readExtra(edgesAvailable[stoi(edges) - 1]);
             break;
         }
-        case 3: {
-            string selectedGraph;
-            while (selectedGraph < "1" || selectedGraph > "3") {
-                cout << "Choose a graph:\n"
-                     << "1 - graph1\n"
-                     << "2 - graph2\n"
-                     << "3 - graph3\n";
-                cin >> selectedGraph;
-            }
-            directory = "Real-world Graphs";
-            subDirectory = "graph" + selectedGraph;
-            break;
-        }
         default:
             cout << "Unexpected error" << endl;
+            exit(1);
             break;
     }
 }
