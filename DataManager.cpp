@@ -70,19 +70,25 @@ void DataManager::start() {
             readRealWorld(directory, subDirectory);
             break;
         }
-        case '3': {
+        case '3':  {
             string edges;
             string edgesAvailable[12] = {"25", "50", "75", "100", "200", "300", "400", "500", "600", "700", "800", "900"};
-            while (edges < "1" || edges > "12") {
+            int edgesInt = 0;
+            while (edgesInt < 1 || edgesInt > 12) {
                 cout << "Choose the number of edges:\n";
                 for (int i = 0; i < 12; i++) {
                     cout << i + 1 << " - " << edgesAvailable[i] << " edges\n";
                 }
-                cin >> edges;
+                getline(cin, edges);
+                try {
+                    edgesInt = stoi(edges);
+                } catch (invalid_argument& e) {
+                    cout << "Invalid input, please enter a number between 1 and 12.\n";
+                }
             }
             directory = "Extra_Fully_Connected_Graphs";
-            subDirectory = "edges_" + edgesAvailable[stoi(edges) - 1] + ".csv";
-            readExtra(edgesAvailable[stoi(edges) - 1]);
+            subDirectory = "edges_" + edgesAvailable[edgesInt - 1] + ".csv";
+            readExtra(edgesAvailable[edgesInt - 1]);
             break;
         }
         default:
