@@ -13,7 +13,7 @@ void Menu::init() {
 }
 
 void Menu::mainMenu() {
-    int choice;
+    string choice;
     cout << "\nCurrent dataset: " << dataManager.getDataset() << " -> " << dataManager.getCsv();
     if (isFullyConnected(dataManager.getGraph())) cout << " (fully connected)" << endl;
     else cout << " (not fully connected)" << endl;
@@ -22,13 +22,14 @@ void Menu::mainMenu() {
     cout << "2 - Triangular Approximation Heuristic (fully connected)" << endl;
     cout << "3 - Other Heuristics (fully connected)" << endl;
     cout << "4 - TSP Solver" << endl;
-    cout << "5 - Complete the graph" << endl;
-    cout << "6 - Change dataset" << endl;
-    cout << "7 - Exit" << endl;
+    cout << "5 - Graph's number of vertices and edges" << endl;
+    cout << "6 - Complete the graph" << endl;
+    cout << "7 - Change dataset" << endl;
+    cout << "8 - Exit" << endl;
     cin >> choice;
     if (dataManager.getDataset() == "Toy-Graphs" || dataManager.getDataset() == "Extra_Fully_Connected_Graphs") {
-        switch (choice) {
-            case 1: {
+        switch (choice[0]) {
+            case '1': {
                 auto start = chrono::high_resolution_clock::now();
                 dataManager.runBacktrackingAlgorithm(dataManager.getGraph());
                 auto end = chrono::high_resolution_clock::now();
@@ -36,7 +37,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 2: {
+            case '2': {
                 if (!isFullyConnected(dataManager.getGraph())) {
                     cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
                          << ") is not fully connected and therefore the Triangular Approximation Heuristic may not work as expected\n";
@@ -57,7 +58,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 3: {
+            case '3': {
                 if (!isFullyConnected(dataManager.getGraph())) {
                     cout << "WARNING: The chosen csv file (" << dataManager.getCsv()
                          << ") is not fully connected and therefore the Nearest Neighbor Heuristic may not work as expected\n";
@@ -78,7 +79,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 4: {
+            case '4': {
                 int startVertex;
                 cout << "Enter the start vertex: " << endl;
                 cin >> startVertex;
@@ -94,7 +95,16 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 5: {
+            case '5' : {
+                cout << "The graph has " << dataManager.getGraph().getNumVertex() << " vertices and ";
+                int numEdges = 0;
+                for (auto vertex : dataManager.getGraph().getVertexSet()) {
+                    numEdges += vertex->getAdj().size();
+                }
+                cout << numEdges << " edges" << endl;
+                break;
+            }
+            case '6': {
                 if (isFullyConnected(dataManager.getGraph())) {
                     cout << "Graph is already fully connected" << endl;
                     break;
@@ -119,11 +129,11 @@ void Menu::mainMenu() {
                     break;
                 }
             }
-            case 6:
+            case '7':
                 dataManager.clean();
                 dataManager.start();
                 break;
-            case 7:
+            case '8':
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:
@@ -133,8 +143,8 @@ void Menu::mainMenu() {
         }
     }
     else if (dataManager.getDataset() == "Real-world Graphs") {
-        switch (choice) {
-            case 1: {
+        switch (choice[0]) {
+            case '1': {
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -149,7 +159,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 2: {
+            case '2': {
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -164,7 +174,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 3: {
+            case '3': {
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -179,7 +189,7 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 4: {
+            case '4': {
                 auto start = chrono::high_resolution_clock::now();
                 int startVertex = -1;
                 while (startVertex < 0 || startVertex >= dataManager.getNodes().size()) {
@@ -193,7 +203,16 @@ void Menu::mainMenu() {
                 printTime(duration);
                 break;
             }
-            case 5: {
+            case '5' : {
+                cout << "The graph has " << dataManager.getGraph().getNumVertex() << " vertices and ";
+                int numEdges = 0;
+                for (auto vertex : dataManager.getGraph().getVertexSet()) {
+                    numEdges += vertex->getAdj().size();
+                }
+                cout << numEdges << " edges" << endl;
+                break;
+            }
+            case '6': {
                 if (isFullyConnected(dataManager.getGraph())) {
                     cout << "Graph is already fully connected" << endl;
                     break;
@@ -207,11 +226,11 @@ void Menu::mainMenu() {
                     break;
                 }
             }
-            case 6:
+            case '7':
                 dataManager.clean();
                 dataManager.start();
                 break;
-            case 7:
+            case '8':
                 cout << "\nGoodbye!\n";
                 exit(0);
             default:

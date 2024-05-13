@@ -88,7 +88,6 @@ void DataManager::start() {
         default:
             cout << "Unexpected error" << endl;
             exit(1);
-            break;
     }
 }
 
@@ -335,7 +334,9 @@ double getEdgeWeight(const Graph<int>& graph, int source, int dest) {
     return INT_MAX;
 }
 
-// Backtracking Algorithm
+/*
+ * Backtracking Algorithm: O(V!)
+ */
 
 void backtrack(const Graph<int>& graph, vector<int>& tour, vector<bool>& visited, double currentCost, double& minCost, vector<int>& bestTour) {
 
@@ -386,9 +387,9 @@ void DataManager::runBacktrackingAlgorithm(Graph<int> graph) {
 
 
 
-
-
-// Triangular Approximation Heuristic
+/*
+ * Triangular Approximation Heuristic: O((V+E)logV)
+ */
 
 void DataManager::TAH(Graph<int> graph) {
     auto mst = graph.primMST();
@@ -417,8 +418,9 @@ void DataManager::dfsMST(int vertex, Graph<int>& mst, unordered_set<int>& visite
 
 
 
-
-// Other Heuristics
+/*
+ * Nearest Neighbor Heuristic: O(V^2)
+ */
 
 int findNearestNeighbor(const Graph<int>& graph, vector<bool>& visited, int currentVertex) {
     int nearestNeighbor = -1;
@@ -457,7 +459,8 @@ vector<int> calculateTSPNearestNeighbor(const Graph<int>& graph) {
 
             tour.pop_back();
             currentVertex = tour.back();
-        } else {
+        }
+        else {
 
             tour.push_back(nearestNeighbor);
             visited[nearestNeighbor] = true;
