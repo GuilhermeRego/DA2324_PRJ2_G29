@@ -198,12 +198,8 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, id, ',');
             getline(iss, longitude, ',');
             getline(iss, latitude, ',');
-            int nodeId = stoi(id);
-            // Check if the vertex already exists in the graph
-            if (!graph.findVertex(nodeId)) {
-                graph.addVertex(nodeId);
-                nodes[nodeId] = Node(nodeId, stod(longitude), stod(latitude));
-            }
+            nodes.insert(make_pair(stoi(id), Node(stoi(id), stod(longitude), stod(latitude))));
+            graph.addVertex(stoi(id));
         }
     }
 
@@ -222,7 +218,6 @@ void DataManager::readRealWorld(const string& dataset, const string& selectedGra
             getline(iss, source, ',');
             getline(iss, dest, ',');
             getline(iss, weight, ',');
-            // Add edges directly without checking if vertices exist
             graph.addEdge(stoi(source), stoi(dest), stod(weight));
             graph.addEdge(stoi(dest), stoi(source), stod(weight));
         }
