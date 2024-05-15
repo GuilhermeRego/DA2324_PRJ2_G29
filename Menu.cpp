@@ -145,6 +145,8 @@ void Menu::mainMenu() {
     else if (dataManager.getDataset() == "Real-world Graphs") {
         switch (choice[0]) {
             case '1': {
+
+                if(!isFullyConnected(dataManager.getGraph())){
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -156,10 +158,19 @@ void Menu::mainMenu() {
                 dataManager.runBacktrackingAlgorithm(fullyConnectedGraph);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-                printTime(duration);
+                printTime(duration);}
+                else{
+                    auto start = chrono::high_resolution_clock::now();
+                    dataManager.runBacktrackingAlgorithm(dataManager.getGraph());
+                    auto end = chrono::high_resolution_clock::now();
+                    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                    printTime(duration);
+                }
                 break;
             }
             case '2': {
+
+                if(!isFullyConnected(dataManager.getGraph())){
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -171,10 +182,18 @@ void Menu::mainMenu() {
                 dataManager.TAH(fullyConnectedGraph);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-                printTime(duration);
+                printTime(duration);}
+                else{
+                    auto start = chrono::high_resolution_clock::now();
+                    dataManager.TAH(dataManager.getGraph());
+                    auto end = chrono::high_resolution_clock::now();
+                    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                    printTime(duration);
+                }
                 break;
             }
             case '3': {
+                if(!isFullyConnected(dataManager.getGraph())){
                 auto start = chrono::high_resolution_clock::now();
                 Graph<int> fullyConnectedGraph = dataManager.getGraph().deepCopy();
                 dataManager.completeGraph(fullyConnectedGraph);
@@ -186,7 +205,14 @@ void Menu::mainMenu() {
                 dataManager.runNearestNeighborHeuristic(fullyConnectedGraph);
                 auto end = chrono::high_resolution_clock::now();
                 auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-                printTime(duration);
+                printTime(duration);}
+                else{
+                    auto start = chrono::high_resolution_clock::now();
+                    dataManager.runNearestNeighborHeuristic(dataManager.getGraph());
+                    auto end = chrono::high_resolution_clock::now();
+                    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+                    printTime(duration);
+                }
                 break;
             }
             case '4': {
