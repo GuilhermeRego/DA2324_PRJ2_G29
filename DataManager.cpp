@@ -235,7 +235,7 @@ bool hasEdge(const Vertex<int>* source, const Vertex<int>* dest);
 void DataManager::completeGraph(Graph<int>& notFullyConnectedGraph) {
     for (auto node1 : notFullyConnectedGraph.getVertexSet()) {
         for (auto node2 : notFullyConnectedGraph.getVertexSet()) {
-            if (node1 != node2 && !hasEdge(node1, node2)) {
+            if (node1->getInfo() != node2->getInfo() && !hasEdge(node1, node2)) {
                 double weight = haversineDistance(nodes.at(node1->getInfo()).getLatitude(), nodes.at(node1->getInfo()).getLongitude(), nodes.at(node2->getInfo()).getLatitude(), nodes.at(node2->getInfo()).getLongitude());
                 notFullyConnectedGraph.addEdge(node1->getInfo(), node2->getInfo(), weight);
             }
