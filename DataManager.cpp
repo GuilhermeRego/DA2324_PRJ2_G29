@@ -73,19 +73,19 @@ void DataManager::start() {
         case '3':  {
             string edges;
             string edgesAvailable[12] = {"25", "50", "75", "100", "200", "300", "400", "500", "600", "700", "800", "900"};
-            int edgesInt = 0;
-            while (edgesInt < 1 || edgesInt > 12) {
+            int edgesInt;
+            do {
                 cout << "Choose the number of edges:\n";
                 for (int i = 0; i < 12; i++) {
                     cout << i + 1 << " - " << edgesAvailable[i] << " edges\n";
                 }
-                getline(cin, edges);
+                cin >> edges;
                 try {
                     edgesInt = stoi(edges);
                 } catch (invalid_argument& e) {
                     cout << "Invalid input, please enter a number between 1 and 12.\n";
                 }
-            }
+            } while (edgesInt < 1 || edgesInt > 12);
             directory = "Extra_Fully_Connected_Graphs";
             subDirectory = "edges_" + edgesAvailable[edgesInt - 1] + ".csv";
             readExtra(edgesAvailable[edgesInt - 1]);
@@ -349,6 +349,11 @@ double getEdgeWeight(const Graph<int>& graph, int source, int dest) {
     return INT_MAX;
 }
 
+
+
+
+
+
 /*
  * Backtracking Algorithm: O(V!)
  */
@@ -502,6 +507,12 @@ void DataManager::runNearestNeighborHeuristic(Graph<int> graph) {
 
 
 
+
+/*
+ * TSP Solver: O(V!)
+
+ */
+
 // The TSP in the Real-World
 void DataManager::printTourCostModified(vector<int>& tour) {
     cout << "Tour: ";
@@ -529,6 +540,7 @@ void DataManager::printTourCostModified(vector<int>& tour) {
         }
         if (!found) {
             cout << "Edge not found" << endl;
+            break;
         }
     }
     // Check for the edge from the last vertex to the start vertex
